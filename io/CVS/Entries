@@ -1,0 +1,17 @@
+/.cvsignore/1.2/Mon Apr 30 10:43:29 2007//
+/Makefile.am/1.5/Mon Apr 30 10:43:29 2007//
+/bounds.h/1.2/Mon Apr 30 10:43:29 2007//
+/display.cc/1.2/Mon Apr 30 10:43:29 2007//
+/display.h/1.2/Mon Apr 30 10:43:29 2007//
+/event.h/1.2/Mon Apr 30 10:43:29 2007//
+/file.cc/1.5/Mon Apr  6 23:42:08 2009//
+/file.h/1.4/Mon Apr  6 23:42:08 2009//
+/fileofs.h/1.2/Mon Apr 30 10:43:29 2007//
+/keyb.cc/1.2/Mon Apr 30 10:43:29 2007//
+/keyb.h/1.2/Mon Apr 30 10:43:29 2007//
+/sys.cc/1.2/Mon Apr 30 10:43:29 2007//
+/sys.h/1.2/Mon Apr 30 10:43:29 2007//
+/sysexcept.cc/1.2/Mon Apr 30 10:43:29 2007//
+/sysexcept.h/1.2/Mon Apr 30 10:43:29 2007//
+/types.h/1.2/Mon Apr 30 10:43:29 2007//
+D

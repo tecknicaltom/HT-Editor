@@ -1,0 +1,11 @@
+/.cvsignore/1.2/Mon Apr 30 10:48:14 2007//
+/Makefile.am/1.4/Sun May 22 21:01:23 2005//
+/eval.cc/1.26/Tue May  6 20:31:14 2008//
+/eval.h/1.14/Mon Apr 30 10:36:11 2007//
+/evalparse.y/1.4/Sat Dec  6 17:49:12 2003//
+/evaltype.h/1.8/Mon Apr 30 10:36:11 2007//
+/evalx.c/1.6/Mon Aug 19 16:58:21 2002//
+/evalx.h/1.3/Tue Aug  6 16:32:45 2002//
+/lex.h/1.1.1.1/Sun Jun 30 13:53:49 2002//
+/lex.l/1.9/Mon Apr 30 10:36:11 2007//
+D

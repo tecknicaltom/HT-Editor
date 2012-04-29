@@ -1,0 +1,6 @@
+.deps
+Makefile
+Makefile.in
+evalparse.c
+lex.c
+evalparse.h

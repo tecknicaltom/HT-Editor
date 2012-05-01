@@ -182,7 +182,11 @@ static ht_view *htelfsymboltable_init(Bounds *b, File *file, ht_format_group *gr
 
 	char *tt = t;
 #define tt_end sizeof t - (tt-t)
-	tt += ht_snprintf(t, tt_end, "idx  binding  type     value    size     ");
+	if (elf32) {
+		tt += ht_snprintf(t, tt_end, "idx  binding  type     value    size     ");
+	} else {
+		tt += ht_snprintf(t, tt_end, "idx  binding  type     value            size             ");
+	}
 	tt += ht_snprintf(tt, tt_end, secstrfmt, "section");
 	tt += ht_snprintf(tt, tt_end, "name");
 	m->add_mask(t);
@@ -238,15 +242,19 @@ static ht_view *htelfsymboltable_init(Bounds *b, File *file, ht_format_group *gr
 		if (elf32)
 		{
 			so = elf_shared->sheaders.sheaders32[elf_shared->header32.e_shstrndx].sh_offset;
-			tt = tag_make_edit_dword(tt, tt_end, h+i*sizeof (ELF_SYMBOL32)+4, elf_bigendian ? tag_endian_big : tag_endian_little);
+			tt = tag_make_edit_dword(tt, tt_end, h+i*sizeof (ELF_SYMBOL32)+offsetof(ELF_SYMBOL32, st_value),
+				elf_bigendian ? tag_endian_big : tag_endian_little);
 			tt += ht_snprintf(tt, tt_end, " ");
-			tt = tag_make_edit_dword(tt, tt_end, h+i*sizeof (ELF_SYMBOL32)+8, elf_bigendian ? tag_endian_big : tag_endian_little);
+			tt = tag_make_edit_dword(tt, tt_end, h+i*sizeof (ELF_SYMBOL32)+offsetof(ELF_SYMBOL32, st_size),
+				elf_bigendian ? tag_endian_big : tag_endian_little);
 			tt += ht_snprintf(tt, tt_end, " ");
 		} else {
 			so = elf_shared->sheaders.sheaders64[elf_shared->header64.e_shstrndx].sh_offset;
-			tt = tag_make_edit_dword(tt, tt_end, h+i*sizeof (ELF_SYMBOL64)+4, elf_bigendian ? tag_endian_big : tag_endian_little);
+			tt = tag_make_edit_qword(tt, tt_end, h+i*sizeof (ELF_SYMBOL64)+offsetof(ELF_SYMBOL64, st_value),
+				elf_bigendian ? tag_endian_big : tag_endian_little);
 			tt += ht_snprintf(tt, tt_end, " ");
-			tt = tag_make_edit_dword(tt, tt_end, h+i*sizeof (ELF_SYMBOL64)+8, elf_bigendian ? tag_endian_big : tag_endian_little);
+			tt = tag_make_edit_qword(tt, tt_end, h+i*sizeof (ELF_SYMBOL64)+offsetof(ELF_SYMBOL64, st_size),
+				elf_bigendian ? tag_endian_big : tag_endian_little);
 			tt += ht_snprintf(tt, tt_end, " ");
 		}
 

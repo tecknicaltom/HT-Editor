@@ -1103,6 +1103,7 @@ void ht_aviewer::handlemsg(htmsg *msg)
 		sub=new ht_static_context_menu();
 		sub->init("~Data");
 		sub->insert_entry("Data ~string", "s", cmd_analyser_data_string, 0, 1);
+		sub->insert_entry("Data ~doubleword 64", "l", cmd_analyser_data_long, 0, 1);
 		sub->insert_entry("Data ~word 32", "i", cmd_analyser_data_int, 0, 1);
 		sub->insert_entry("Data ~halfword 16", "h", cmd_analyser_data_half, 0, 1);
 		sub->insert_entry("Data ~byte 8", "b", cmd_analyser_data_byte, 0, 1);
@@ -1156,6 +1157,12 @@ void ht_aviewer::handlemsg(htmsg *msg)
 		case 'p':
 			sendmsg(cmd_analyser_pause_resume);
 			clearmsg(msg);
+			return;
+		case 'l':
+			if (cursor_tag_class == tag_class_sel) {
+				sendmsg(cmd_analyser_data_long);
+				clearmsg(msg);
+			}
 			return;
 		case 'i':
 			if (cursor_tag_class == tag_class_sel) {
@@ -1385,6 +1392,14 @@ void ht_aviewer::handlemsg(htmsg *msg)
 	case cmd_analyser_export_file:
 		if (!analy) break;
 		exportFileDialog();
+		clearmsg(msg);
+		return;
+	case cmd_analyser_data_long:
+		if (!analy) break;
+		dataIntDialog(dst_iqword, 8);
+		analy->makeDirty();
+		analy_sub->output->invalidateCache();
+		dirtyview();
 		clearmsg(msg);
 		return;
 	case cmd_analyser_data_int:

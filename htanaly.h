@@ -53,6 +53,7 @@
 #define cmd_analyser_data_int        	HT_COMMAND(518)
 #define cmd_analyser_data_half		HT_COMMAND(519)
 #define cmd_analyser_data_byte        	HT_COMMAND(520)
+#define cmd_analyser_data_long       	HT_COMMAND(521)
 
 /* FIXME: srt-experimental */
 

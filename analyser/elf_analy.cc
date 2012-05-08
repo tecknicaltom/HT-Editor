@@ -38,6 +38,8 @@
 #include "snprintf.h"
 #include "x86asm.h"
 
+#include "log.h"
+
 extern "C" {
 #include "demangle.h"
 }
@@ -151,6 +153,11 @@ void ElfAnalyser::beginAnalysis()
 
 	/* symbols */
 	if (c32) {
+		for (uint i=1; i < elf_shared->sheaders.count; i++) {
+			if ((elf_shared->sheaders.sheaders32[i].sh_type==ELF_SHT_REL) || (elf_shared->sheaders.sheaders32[i].sh_type==ELF_SHT_RELA)) {
+				initInsertRelocSymbols(i);
+			}
+		}
 		for (uint i=1; i < elf_shared->sheaders.count; i++) {
 			if ((elf_shared->sheaders.sheaders32[i].sh_type==ELF_SHT_SYMTAB) || (elf_shared->sheaders.sheaders32[i].sh_type==ELF_SHT_DYNSYM)) {
 				initInsertSymbols(i);
@@ -429,6 +436,130 @@ void ElfAnalyser::initInsertSymbols(int shidx)
 	}
 }
 
+void ElfAnalyser::initInsertRelocSymbols(int shidx)
+{
+	LOG("In initInsertRelocSymbols: %d", shidx);
+	char elf_buffer[1024];
+	if (elf_shared->ident.e_ident[ELF_EI_CLASS] == ELFCLASS32) {
+		FileOfs reloctab_offset = elf_shared->sheaders.sheaders32[shidx].sh_offset;
+		uint reloctab_type = elf_shared->sheaders.sheaders32[shidx].sh_type;
+		uint relnum = elf_shared->sheaders.sheaders32[shidx].sh_size / (reloctab_type == ELF_SHT_REL ? sizeof (ELF_REL32) : sizeof (ELF_RELA32));
+
+		// FIXME: support rela
+		if (reloctab_type == ELF_SHT_RELA) return;
+
+		int symtab_shidx = elf_shared->sheaders.sheaders32[shidx].sh_link;
+		if (!isValidELFSectionIdx(elf_shared, symtab_shidx)) return;
+		FileOfs symtab_offset = elf_shared->sheaders.sheaders32[symtab_shidx].sh_offset;
+		FileOfs stringtab_offset = elf_shared->sheaders.sheaders32[elf_shared->sheaders.sheaders32[symtab_shidx].sh_link].sh_offset;
+
+		/*
+		int reloc_dest_shidx = elf_shared->sheaders.sheaders32[shidx].sh_info;
+		if (!isValidELFSectionIdx(elf_shared, reloc_dest_shidx)) return;
+		if (!isValidELFSectionIdx(elf_shared, elf_shared->header32.e_shstrndx)) return;
+
+		String reloc_dest_name("?");
+		file->seek(elf_shared->sheaders.sheaders32[elf_shared->header32.e_shstrndx].sh_offset
+			+ elf_shared->sheaders.sheaders32[reloc_dest_shidx].sh_name);
+		file->readStringz(reloc_dest_name);
+		LOG("relocates section: %d (%s)", reloc_dest_shidx, reloc_dest_name.contentChar());
+		*/
+
+		int *entropy = random_permutation(relnum);
+		for (uint i = 0; i < relnum; i++) {
+			ELF_REL32 rel;
+			//if (entropy[i] == 0) continue;
+			file->seek(reloctab_offset+entropy[i]*sizeof (ELF_REL32));
+			file->read(&rel, sizeof rel);
+			createHostStruct(&rel, ELF_REL32_struct, elf_shared->byte_order);
+			uint symbolidx = ELF32_R_SYM(rel.r_info);
+
+			ELF_SYMBOL32 sym;
+			file->seek(symtab_offset+symbolidx*sizeof (ELF_SYMBOL32));
+			file->read(&sym, sizeof sym);
+			createHostStruct(&sym, ELF_SYMBOL32_struct, elf_shared->byte_order);
+
+			file->seek(stringtab_offset+sym.st_name);
+			char *name = file->fgetstrz();
+			if (!name) continue;
+			LOG("Here: %s", name);
+
+			Address *address = createAddress32(rel.r_offset);
+			if (validAddress(address, scvalid))
+			{
+				char label[256];
+				//ht_snprintf(label, sizeof label, "%s@%s", name, reloc_dest_name.contentChar());
+				ht_snprintf(label, sizeof label, "%s@%s", name, getSegmentNameByAddress(address));
+				make_valid_name(label, label);
+				// TODO: label type?
+				assignSymbol(address, label, label_func);
+				//make_valid_name(label, label);
+			}
+
+/*
+			switch (ELF32_ST_TYPE(sym.st_info)) {
+			case ELF_STT_NOTYPE:
+			case ELF_STT_FUNC: {
+				char *label = name;
+				if (!getSymbolByName(label)) {
+					elf32_addr sym_addr = sym.st_value;
+					if (elf_shared->shrelocs && sym.st_shndx > 0 && sym.st_shndx < elf_shared->sheaders.count
+					&& elf_shared->shrelocs[sym.st_shndx].relocAddr) {
+						sym_addr += elf_shared->shrelocs[sym.st_shndx].relocAddr;
+					}
+					Address *address = createAddress32(sym_addr);
+char tmpstr[32];
+address->toString(tmpstr, 32);
+					if (validAddress(address, scvalid)) {
+						char *demangled = cplus_demangle(label, DMGL_PARAMS | DMGL_ANSI);
+						if (!demangled) demangled = cplus_demangle_v3(label, DMGL_PARAMS | DMGL_ANSI | DMGL_TYPES);
+						make_valid_name(label, label);
+						ht_snprintf(elf_buffer, sizeof elf_buffer, "; function %s (%s)", (demangled) ? demangled : label, bind);
+						free(demangled);
+						addComment(address, 0, "");
+						addComment(address, 0, ";********************************************************");
+						addComment(address, 0, elf_buffer);
+						addComment(address, 0, ";********************************************************");
+						pushAddress(address, address);
+						assignSymbol(address, label, label_func);
+					}
+					delete address;
+				}
+				break;
+			}
+			case ELF_STT_OBJECT: {
+				char *label = name;
+				if (!getSymbolByName(label)) {
+					Address *address = createAddress32(sym.st_value);
+					if (validAddress(address, scvalid)) {
+						char *demangled = cplus_demangle(label, DMGL_PARAMS | DMGL_ANSI);
+
+						make_valid_name(label, label);
+
+						ht_snprintf(elf_buffer, sizeof elf_buffer, "; data object %s, size %d (%s)", (demangled) ? demangled : label, sym.st_size, bind);
+
+						if (demangled) free(demangled);
+
+						addComment(address, 0, "");
+						addComment(address, 0, ";********************************************************");
+						addComment(address, 0, elf_buffer);
+						addComment(address, 0, ";********************************************************");
+						assignSymbol(address, label, label_data);
+					}
+					delete address;
+				}
+				break;
+			}
+			case ELF_STT_SECTION:
+			case ELF_STT_FILE:
+				break;
+			}
+			free(name);
+			*/
+		}
+		free(entropy);
+	}
+}
 /*
  *
  */

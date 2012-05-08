@@ -52,6 +52,7 @@ public:
 	virtual	void 		initCodeAnalyser();
 		void		initInsertSymbols(int shidx);
 		void		initInsertFakeSymbols();
+		void		initInsertRelocSymbols(int shidx);
 	virtual	void 		initUnasm();
 	virtual	Address		*nextValid(Address *Addr);
 	virtual	void		store(ObjectStream &f) const;

@@ -40,6 +40,7 @@
 #define DPRINTF(msg...)
 //#undef DPRINTF
 //#define DPRINTF(msg...) {global_analyser_address_string_format = ADDRESS_STRING_FORMAT_LEADING_ZEROS;char buf[1024]; ht_snprintf(buf, sizeof buf, ##msg); fprintf(stdout, buf);}
+#include "log.h"
 
 int global_analyser_address_string_format = ADDRESS_STRING_FORMAT_COMPACT;
 
@@ -955,7 +956,7 @@ bool	Analyser::continueAnalysis()
 		last_explored->add(len);
 
 		do {
-			DPRINTF("opcode @%y [func: %y]: %s\n", addr, (cur_func) ? cur_func->addr : invalid_addr, disasm->str(instr, 0));
+			LOG("opcode @%y [func: %y]: %s", addr, (cur_func) ? cur_func->addr : invalid_addr, disasm->str(instr, 0));
 			if (disasm->validInsn(instr)) {
 				branch = analy_disasm->isBranch(instr);
 				if (branch != br_nobranch) {

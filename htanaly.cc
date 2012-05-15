@@ -1650,9 +1650,9 @@ void ht_aviewer::showCallChain(Address *Addr)
 	dialog->insert(bt);
 	int r = dialog->run(false);
 	if (r == button_ok) {
-		ht_treeview_data tvd;
-		ViewDataBuf vdb(dialog, &tvd, sizeof tvd);
-		gotoAddress(((CallChainNode*)tvd.selected)->xa, this);
+		ht_treeview_data *tvd;
+		ViewDataBuf vdb(cc, &tvd, sizeof tvd);
+		gotoAddress(((CallChainNode*)tvd->selected)->xa, this);
 	}
 	dialog->done();
 	delete dialog;

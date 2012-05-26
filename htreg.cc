@@ -27,6 +27,7 @@
 #include "htctrl.h"
 #include "htdialog.h"
 #include "htiobox.h"
+#include "htpal.h"
 #include "htreg.h"
 #include "log.h"
 #include "snprintf.h"
@@ -47,6 +48,8 @@ ht_registry *registry;
 #define ATOM_HT_CREATE_EMPTY_DWORD	MAGIC32("REG\x22")
 #define ATOM_HT_CREATE_EMPTY_STRING	MAGIC32("REG\x23")
 #define ATOM_HT_CREATE_EMPTY_RAW	MAGIC32("REG\x24")
+
+#define GENERATE_NEW_REGISTRY 1
 
 /*
  *	CLASS ht_registry_data
@@ -366,7 +369,7 @@ void ht_registry_node_type_desc::store(ObjectStream &f) const
 ht_registry_data *create_empty_palette_entry();
 void ht_registry::init()
 {
-#if 0
+#if GENERATE_NEW_REGISTRY
 	// build registry root
 	AVLTree *s = new AVLTree(true);
 	root = new ht_registry_node(RNT_SUBDIR, "/", new ht_registry_data_stree(s));
@@ -384,6 +387,7 @@ void ht_registry::init()
 	config_editor->insert(new ht_registry_node(RNT_STRING, "EOF", new ht_registry_data_string("<EOF>")));
 	config_editor->insert(new ht_registry_node(RNT_STRING, "EOL", new ht_registry_data_string(".")));
 	config_editor->insert(new ht_registry_node(RNT_DWORD, "auto indent", new ht_registry_data_dword(1)));
+	config_editor->insert(new ht_registry_node(RNT_DWORD, "scroll offset", new ht_registry_data_dword(0)));
 	config_editor->insert(new ht_registry_node(RNT_DWORD, "tab size", new ht_registry_data_dword(8)));
 
 	AVLTree *palette_analyser = new AVLTree(true);
@@ -393,12 +397,12 @@ void ht_registry::init()
 	palette->insert(new ht_registry_node(RNT_SUBDIR, "analyser", new ht_registry_data_stree(palette_analyser)));
 	AVLTree *analyser_default = new AVLTree(true);
 	palette_analyser->insert(new ht_registry_node(RNT_SUBDIR, "default", new ht_registry_data_stree(analyser_default)));
-	analyser_default->insert(new ht_registry_node(256, "default", create_empty_palette_entry()));
-	analyser_default->insert(new ht_registry_node(256, "comment", create_empty_palette_entry()));
-	analyser_default->insert(new ht_registry_node(256, "label", create_empty_palette_entry()));
-	analyser_default->insert(new ht_registry_node(256, "number", create_empty_palette_entry()));
-	analyser_default->insert(new ht_registry_node(256, "string", create_empty_palette_entry()));
-	analyser_default->insert(new ht_registry_node(256, "symbol-character", create_empty_palette_entry()));
+	analyser_default->insert(new ht_registry_node(256, "default", new palette_entry(0, 33288)));
+	analyser_default->insert(new ht_registry_node(256, "comment", new palette_entry(0, 1800)));
+	analyser_default->insert(new ht_registry_node(256, "label", new palette_entry(0, 34312)));
+	analyser_default->insert(new ht_registry_node(256, "number", new palette_entry(0, 776)));
+	analyser_default->insert(new ht_registry_node(256, "string", new palette_entry(0, 33800)));
+	analyser_default->insert(new ht_registry_node(256, "symbol-character", new palette_entry(0, 33544)));
 
 	palette->insert(new ht_registry_node(RNT_SUBDIR, "generic", new ht_registry_data_stree(palette_generic)));
 	AVLTree *palette_generic_black = new AVLTree(true);
@@ -419,179 +423,179 @@ void ht_registry::init()
 	palette_generic->insert(new ht_registry_node(RNT_SUBDIR, "gray", new ht_registry_data_stree(palette_generic_gray)));
 	palette_generic->insert(new ht_registry_node(RNT_SUBDIR, "gray2", new ht_registry_data_stree(palette_generic_gray2)));
 	// black
-	palette_generic_black->insert(new ht_registry_node(256, "body", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "text focused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "text unfocused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "text shortcut", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "text shortcut selected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "text selected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "text disabled", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "frame focused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "frame unfocused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "frame move-resize", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "frame killer", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "scrollbar", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "input focused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "input unfocused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "input selected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "input clip-chars", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "button focused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "button unfocused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "button shadow", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "button shortcut", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "list focused & selected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "list focused & unselected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "list unfocused & selected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "list unfocused & unselected", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "cluster focused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "cluster unfocused", create_empty_palette_entry()));
-	palette_generic_black->insert(new ht_registry_node(256, "cluster shortcut", create_empty_palette_entry()));
+	palette_generic_black->insert(new ht_registry_node(256, "body", new palette_entry(0, 1792)));
+	palette_generic_black->insert(new ht_registry_node(256, "text focused", new palette_entry(0, 3)));
+	palette_generic_black->insert(new ht_registry_node(256, "text unfocused", new palette_entry(0, 8)));
+	palette_generic_black->insert(new ht_registry_node(256, "text shortcut", new palette_entry(0, 1792)));
+	palette_generic_black->insert(new ht_registry_node(256, "text shortcut selected", new palette_entry(0, 34312)));
+	palette_generic_black->insert(new ht_registry_node(256, "text selected", new palette_entry(0, 0)));
+	palette_generic_black->insert(new ht_registry_node(256, "text disabled", new palette_entry(0, 1795)));
+	palette_generic_black->insert(new ht_registry_node(256, "frame focused", new palette_entry(0, 1800)));
+	palette_generic_black->insert(new ht_registry_node(256, "frame unfocused", new palette_entry(0, 1800)));
+	palette_generic_black->insert(new ht_registry_node(256, "frame move-resize", new palette_entry(0, 33288)));
+	palette_generic_black->insert(new ht_registry_node(256, "frame killer", new palette_entry(0, 520)));
+	palette_generic_black->insert(new ht_registry_node(256, "scrollbar", new palette_entry(0, 7)));
+	palette_generic_black->insert(new ht_registry_node(256, "input focused", new palette_entry(0, 34561)));
+	palette_generic_black->insert(new ht_registry_node(256, "input unfocused", new palette_entry(0, 34561)));
+	palette_generic_black->insert(new ht_registry_node(256, "input selected", new palette_entry(0, 34562)));
+	palette_generic_black->insert(new ht_registry_node(256, "input clip-chars", new palette_entry(0, 33281)));
+	palette_generic_black->insert(new ht_registry_node(256, "button focused", new palette_entry(0, 34562)));
+	palette_generic_black->insert(new ht_registry_node(256, "button unfocused", new palette_entry(0, 2)));
+	palette_generic_black->insert(new ht_registry_node(256, "button shadow", new palette_entry(0, 8)));
+	palette_generic_black->insert(new ht_registry_node(256, "button shortcut", new palette_entry(0, 0)));
+	palette_generic_black->insert(new ht_registry_node(256, "list focused & selected", new palette_entry(0, 34561)));
+	palette_generic_black->insert(new ht_registry_node(256, "list focused & unselected", new palette_entry(0, 1792)));
+	palette_generic_black->insert(new ht_registry_node(256, "list unfocused & selected", new palette_entry(0, 34560)));
+	palette_generic_black->insert(new ht_registry_node(256, "list unfocused & unselected", new palette_entry(0, 0)));
+	palette_generic_black->insert(new ht_registry_node(256, "cluster focused", new palette_entry(0, 34563)));
+	palette_generic_black->insert(new ht_registry_node(256, "cluster unfocused", new palette_entry(0, 3)));
+	palette_generic_black->insert(new ht_registry_node(256, "cluster shortcut", new palette_entry(0, 34307)));
 	// blue
-	palette_generic_blue->insert(new ht_registry_node(256, "body", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "text focused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "text unfocused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "text shortcut", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "text shortcut selected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "text selected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "text disabled", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "frame focused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "frame unfocused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "frame move-resize", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "frame killer", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "scrollbar", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "input focused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "input unfocused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "input selected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "input clip-chars", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "button focused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "button unfocused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "button shadow", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "button shortcut", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "list focused & selected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "list focused & unselected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "list unfocused & selected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "list unfocused & unselected", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "cluster focused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "cluster unfocused", create_empty_palette_entry()));
-	palette_generic_blue->insert(new ht_registry_node(256, "cluster shortcut", create_empty_palette_entry()));
+	palette_generic_blue->insert(new ht_registry_node(256, "body", new palette_entry(0, 769)));
+	palette_generic_blue->insert(new ht_registry_node(256, "text focused", new palette_entry(0, 34305)));
+	palette_generic_blue->insert(new ht_registry_node(256, "text unfocused", new palette_entry(0, 34561)));
+	palette_generic_blue->insert(new ht_registry_node(256, "text shortcut", new palette_entry(0, 1)));
+	palette_generic_blue->insert(new ht_registry_node(256, "text shortcut selected", new palette_entry(0, 1)));
+	palette_generic_blue->insert(new ht_registry_node(256, "text selected", new palette_entry(0, 257)));
+	palette_generic_blue->insert(new ht_registry_node(256, "text disabled", new palette_entry(0, 34305)));
+	palette_generic_blue->insert(new ht_registry_node(256, "frame focused", new palette_entry(0, 34568)));
+	palette_generic_blue->insert(new ht_registry_node(256, "frame unfocused", new palette_entry(0, 1800)));
+	palette_generic_blue->insert(new ht_registry_node(256, "frame move-resize", new palette_entry(0, 33288)));
+	palette_generic_blue->insert(new ht_registry_node(256, "frame killer", new palette_entry(0, 33288)));
+	palette_generic_blue->insert(new ht_registry_node(256, "scrollbar", new palette_entry(0, 259)));
+	palette_generic_blue->insert(new ht_registry_node(256, "input focused", new palette_entry(0, 34561)));
+	palette_generic_blue->insert(new ht_registry_node(256, "input unfocused", new palette_entry(0, 34561)));
+	palette_generic_blue->insert(new ht_registry_node(256, "input selected", new palette_entry(0, 33031)));
+	palette_generic_blue->insert(new ht_registry_node(256, "input clip-chars", new palette_entry(0, 33281)));
+	palette_generic_blue->insert(new ht_registry_node(256, "button focused", new palette_entry(0, 34562)));
+	palette_generic_blue->insert(new ht_registry_node(256, "button unfocused", new palette_entry(0, 2)));
+	palette_generic_blue->insert(new ht_registry_node(256, "button shadow", new palette_entry(0, 8)));
+	palette_generic_blue->insert(new ht_registry_node(256, "button shortcut", new palette_entry(0, 34312)));
+	palette_generic_blue->insert(new ht_registry_node(256, "list focused & selected", new palette_entry(0, 34563)));
+	palette_generic_blue->insert(new ht_registry_node(256, "list focused & unselected", new palette_entry(0, 769)));
+	palette_generic_blue->insert(new ht_registry_node(256, "list unfocused & selected", new palette_entry(0, 3)));
+	palette_generic_blue->insert(new ht_registry_node(256, "list unfocused & unselected", new palette_entry(0, 769)));
+	palette_generic_blue->insert(new ht_registry_node(256, "cluster focused", new palette_entry(0, 34563)));
+	palette_generic_blue->insert(new ht_registry_node(256, "cluster unfocused", new palette_entry(0, 0)));
+	palette_generic_blue->insert(new ht_registry_node(256, "cluster shortcut", new palette_entry(0, 0)));
 	// cyan
-	palette_generic_cyan->insert(new ht_registry_node(256, "body", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "text focused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "text unfocused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "text shortcut", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "text shortcut selected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "text selected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "text disabled", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "frame focused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "frame unfocused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "frame move-resize", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "frame killer", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "scrollbar", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "input focused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "input unfocused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "input selected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "input clip-chars", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "button focused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "button unfocused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "button shadow", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "button shortcut", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "list focused & selected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "list focused & unselected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "list unfocused & selected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "list unfocused & unselected", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "cluster focused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "cluster unfocused", create_empty_palette_entry()));
-	palette_generic_cyan->insert(new ht_registry_node(256, "cluster shortcut", create_empty_palette_entry()));
+	palette_generic_cyan->insert(new ht_registry_node(256, "body", new palette_entry(0, 3)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "text focused", new palette_entry(0, 8)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "text unfocused", new palette_entry(0, 8)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "text shortcut", new palette_entry(0, 34312)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "text shortcut selected", new palette_entry(0, 34305)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "text selected", new palette_entry(0, 8)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "text disabled", new palette_entry(0, 1792)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "frame focused", new palette_entry(0, 34568)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "frame unfocused", new palette_entry(0, 8)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "frame move-resize", new palette_entry(0, 33288)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "frame killer", new palette_entry(0, 33288)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "scrollbar", new palette_entry(0, 769)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "input focused", new palette_entry(0, 34561)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "input unfocused", new palette_entry(0, 34561)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "input selected", new palette_entry(0, 34562)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "input clip-chars", new palette_entry(0, 33281)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "button focused", new palette_entry(0, 34562)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "button unfocused", new palette_entry(0, 2)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "button shadow", new palette_entry(0, 8)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "button shortcut", new palette_entry(0, 34312)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "list focused & selected", new palette_entry(0, 34561)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "list focused & unselected", new palette_entry(0, 3)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "list unfocused & selected", new palette_entry(0, 34563)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "list unfocused & unselected", new palette_entry(0, 3)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "cluster focused", new palette_entry(0, 34563)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "cluster unfocused", new palette_entry(0, 3)));
+	palette_generic_cyan->insert(new ht_registry_node(256, "cluster shortcut", new palette_entry(0, 34307)));
 	// gray
-	palette_generic_gray->insert(new ht_registry_node(256, "body", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "text focused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "text unfocused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "text shortcut", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "text shortcut selected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "text selected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "text disabled", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "frame focused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "frame unfocused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "frame move-resize", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "frame killer", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "scrollbar", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "input focused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "input unfocused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "input selected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "input clip-chars", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "button focused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "button unfocused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "button shadow", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "button shortcut", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "list focused & selected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "list focused & unselected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "list unfocused & selected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "list unfocused & unselected", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "cluster focused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "cluster unfocused", create_empty_palette_entry()));
-	palette_generic_gray->insert(new ht_registry_node(256, "cluster shortcut", create_empty_palette_entry()));
+	palette_generic_gray->insert(new ht_registry_node(256, "body", new palette_entry(0, 7)));
+	palette_generic_gray->insert(new ht_registry_node(256, "text focused", new palette_entry(0, 34568)));
+	palette_generic_gray->insert(new ht_registry_node(256, "text unfocused", new palette_entry(0, 8)));
+	palette_generic_gray->insert(new ht_registry_node(256, "text shortcut", new palette_entry(0, 34312)));
+	palette_generic_gray->insert(new ht_registry_node(256, "text shortcut selected", new palette_entry(0, 34312)));
+	palette_generic_gray->insert(new ht_registry_node(256, "text selected", new palette_entry(0, 34561)));
+	palette_generic_gray->insert(new ht_registry_node(256, "text disabled", new palette_entry(0, 32776)));
+	palette_generic_gray->insert(new ht_registry_node(256, "frame focused", new palette_entry(0, 34568)));
+	palette_generic_gray->insert(new ht_registry_node(256, "frame unfocused", new palette_entry(0, 8)));
+	palette_generic_gray->insert(new ht_registry_node(256, "frame move-resize", new palette_entry(0, 33288)));
+	palette_generic_gray->insert(new ht_registry_node(256, "frame killer", new palette_entry(0, 33288)));
+	palette_generic_gray->insert(new ht_registry_node(256, "scrollbar", new palette_entry(0, 769)));
+	palette_generic_gray->insert(new ht_registry_node(256, "input focused", new palette_entry(0, 34561)));
+	palette_generic_gray->insert(new ht_registry_node(256, "input unfocused", new palette_entry(0, 34561)));
+	palette_generic_gray->insert(new ht_registry_node(256, "input selected", new palette_entry(0, 34562)));
+	palette_generic_gray->insert(new ht_registry_node(256, "input clip-chars", new palette_entry(0, 33281)));
+	palette_generic_gray->insert(new ht_registry_node(256, "button focused", new palette_entry(0, 34562)));
+	palette_generic_gray->insert(new ht_registry_node(256, "button unfocused", new palette_entry(0, 2)));
+	palette_generic_gray->insert(new ht_registry_node(256, "button shadow", new palette_entry(0, 8)));
+	palette_generic_gray->insert(new ht_registry_node(256, "button shortcut", new palette_entry(0, 34312)));
+	palette_generic_gray->insert(new ht_registry_node(256, "list focused & selected", new palette_entry(0, 34562)));
+	palette_generic_gray->insert(new ht_registry_node(256, "list focused & unselected", new palette_entry(0, 3)));
+	palette_generic_gray->insert(new ht_registry_node(256, "list unfocused & selected", new palette_entry(0, 34563)));
+	palette_generic_gray->insert(new ht_registry_node(256, "list unfocused & unselected", new palette_entry(0, 3)));
+	palette_generic_gray->insert(new ht_registry_node(256, "cluster focused", new palette_entry(0, 34563)));
+	palette_generic_gray->insert(new ht_registry_node(256, "cluster unfocused", new palette_entry(0, 3)));
+	palette_generic_gray->insert(new ht_registry_node(256, "cluster shortcut", new palette_entry(0, 34307)));
 	// gray2
-	palette_generic_gray2->insert(new ht_registry_node(256, "body", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "text focused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "text unfocused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "text shortcut", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "text shortcut selected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "text selected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "text disabled", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "frame focused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "frame unfocused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "frame move-resize", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "frame killer", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "scrollbar", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "input focused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "input unfocused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "input selected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "input clip-chars", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "button focused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "button unfocused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "button shadow", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "button shortcut", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "list focused & selected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "list focused & unselected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "list unfocused & selected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "list unfocused & unselected", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "cluster focused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "cluster unfocused", create_empty_palette_entry()));
-	palette_generic_gray2->insert(new ht_registry_node(256, "cluster shortcut", create_empty_palette_entry()));
+	palette_generic_gray2->insert(new ht_registry_node(256, "body", new palette_entry(0, 7)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "text focused", new palette_entry(0, 8)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "text unfocused", new palette_entry(0, 8)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "text shortcut", new palette_entry(0, 1032)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "text shortcut selected", new palette_entry(0, 1032)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "text selected", new palette_entry(0, 2)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "text disabled", new palette_entry(0, 1792)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "frame focused", new palette_entry(0, 8)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "frame unfocused", new palette_entry(0, 8)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "frame move-resize", new palette_entry(0, 33288)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "frame killer", new palette_entry(0, 33288)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "scrollbar", new palette_entry(0, 8)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "input focused", new palette_entry(0, 34561)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "input unfocused", new palette_entry(0, 34561)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "input selected", new palette_entry(0, 34562)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "input clip-chars", new palette_entry(0, 33281)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "button focused", new palette_entry(0, 34562)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "button unfocused", new palette_entry(0, 2)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "button shadow", new palette_entry(0, 8)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "button shortcut", new palette_entry(0, 34312)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "list focused & selected", new palette_entry(0, 34562)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "list focused & unselected", new palette_entry(0, 3)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "list unfocused & selected", new palette_entry(0, 34563)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "list unfocused & unselected", new palette_entry(0, 3)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "cluster focused", new palette_entry(0, 34563)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "cluster unfocused", new palette_entry(0, 3)));
+	palette_generic_gray2->insert(new ht_registry_node(256, "cluster shortcut", new palette_entry(0, 0)));
 	palette->insert(new ht_registry_node(RNT_SUBDIR, "syntax", new ht_registry_data_stree(palette_syntax)));
 	AVLTree *c = new AVLTree(true);
 	palette_syntax->insert(new ht_registry_node(RNT_SUBDIR, "c", new ht_registry_data_stree(c)));
 	AVLTree *default1 = new AVLTree(true);
 	c->insert(new ht_registry_node(RNT_SUBDIR, "default", new ht_registry_data_stree(default1)));
-	default1->insert(new ht_registry_node(256, "whitespace", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "comment", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "identifier", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "reserved", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "integer number", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "float number", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "string", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "character", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "symbol", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "preprocess", create_empty_palette_entry()));
-	default1->insert(new ht_registry_node(256, "meta", create_empty_palette_entry()));
+	default1->insert(new ht_registry_node(256, "whitespace", new palette_entry(0, 34312)));
+	default1->insert(new ht_registry_node(256, "comment", new palette_entry(0, 1800)));
+	default1->insert(new ht_registry_node(256, "identifier", new palette_entry(0, 34312)));
+	default1->insert(new ht_registry_node(256, "reserved", new palette_entry(0, 34568)));
+	default1->insert(new ht_registry_node(256, "integer number", new palette_entry(0, 34056)));
+	default1->insert(new ht_registry_node(256, "float number", new palette_entry(0, 33032)));
+	default1->insert(new ht_registry_node(256, "string", new palette_entry(0, 33544)));
+	default1->insert(new ht_registry_node(256, "character", new palette_entry(0, 33544)));
+	default1->insert(new ht_registry_node(256, "symbol", new palette_entry(0, 34568)));
+	default1->insert(new ht_registry_node(256, "preprocess", new palette_entry(0, 33288)));
+	default1->insert(new ht_registry_node(256, "meta", new palette_entry(0, 33032)));
 	palette->insert(new ht_registry_node(RNT_SUBDIR, "tags", new ht_registry_data_stree(palette_tags)));
 	AVLTree *tag_default = new AVLTree(true);
         palette_tags->insert(new ht_registry_node(RNT_SUBDIR, "default", new ht_registry_data_stree(tag_default)));
-	tag_default->insert(new ht_registry_node(256, "edit-tag cursor select", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "edit-tag cursor edit", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "edit-tag cursor unfocused", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "edit-tag selected", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "edit-tag modified", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "edit-tag", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "sel-tag cursor focused", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "sel-tag cursor unfocused", create_empty_palette_entry()));
-	tag_default->insert(new ht_registry_node(256, "sel-tag", create_empty_palette_entry()));
+	tag_default->insert(new ht_registry_node(256, "edit-tag cursor select", new palette_entry(0, 34564)));
+	tag_default->insert(new ht_registry_node(256, "edit-tag cursor edit", new palette_entry(0, 34564)));
+	tag_default->insert(new ht_registry_node(256, "edit-tag cursor unfocused", new palette_entry(0, 34568)));
+	tag_default->insert(new ht_registry_node(256, "edit-tag selected", new palette_entry(0, 32775)));
+	tag_default->insert(new ht_registry_node(256, "edit-tag modified", new palette_entry(0, 33800)));
+	tag_default->insert(new ht_registry_node(256, "edit-tag", new palette_entry(0, 1800)));
+	tag_default->insert(new ht_registry_node(256, "sel-tag cursor focused", new palette_entry(0, 34563)));
+	tag_default->insert(new ht_registry_node(256, "sel-tag cursor unfocused", new palette_entry(0, 3)));
+	tag_default->insert(new ht_registry_node(256, "sel-tag", new palette_entry(0, 34568)));
 
 	// build node_types tree
 	node_types = new AVLTree(true);
 
 	struct bla {
-		char *identifier;
+		const char *identifier;
 		ht_registry_node_type type;
 		create_empty_registry_data_func create_empty_registry_data;
 	};
@@ -1116,13 +1120,16 @@ bool init_registry()
 	/*
 	 *	load default registry
 	 */
+#if ! GENERATE_NEW_REGISTRY
 	ConstMemMapFile f(default_reg, sizeof default_reg);
 	CompressedStream c(&f, false);
 	ObjectStreamBin o(&c, false);
 
 	GET_OBJECT(o, registry);
-//	registry = new ht_registry;
-//	registry->init();
+#else
+	registry = new ht_registry;
+	registry->init();
+#endif
 
 	return true;
 }

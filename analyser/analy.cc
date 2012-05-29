@@ -1211,8 +1211,20 @@ void	Analyser::doBranch(branch_enum_t branch, OPCODE *opcode, int len)
 						addComment(branch_addr, 0, ";----------------------------------------------");
 						global_analyser_address_string_format = ADDRESS_STRING_FORMAT_COMPACT;
 						if (l && l->name) {
-							ht_snprintf(buf, sizeof buf, "%s %s", ";  W R A P P E R for", l->name);
-							ht_snprintf(label, sizeof label, "%s_%s_%y", LPRFX_WRAP, l->name, branch_addr);
+							char wrapped_label[1024];
+							strncpy(wrapped_label, l->name, sizeof wrapped_label);
+							char *at = strstr(wrapped_label, "@");
+							if (at && at != wrapped_label && !strcmp(at+1, getSegmentNameByAddress(wrap_addr))) {
+								*at = '\0';
+								const char *branch_segment = getSegmentNameByAddress(branch_addr);
+								ht_snprintf(buf, sizeof buf, "%s %s", "; W R A P P E R for", l->name);
+								ht_snprintf(label, sizeof label, "%s@%s", wrapped_label, branch_segment);
+							}
+							else
+							{
+								ht_snprintf(buf, sizeof buf, "%s %s", ";  W R A P P E R for", l->name);
+								ht_snprintf(label, sizeof label, "%s_%s_%y", LPRFX_WRAP, l->name, branch_addr);
+							}
 						} else {
 							ht_snprintf(buf, sizeof buf, "%s %s %y", ";  W R A P P E R for", "address", wrap_addr);
 							ht_snprintf(label, sizeof label, "%s_%y_%y", LPRFX_WRAP, wrap_addr, branch_addr);

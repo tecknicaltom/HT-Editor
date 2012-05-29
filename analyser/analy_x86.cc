@@ -601,7 +601,8 @@ void	AnalyX86Disassembler::examineOpcode(OPCODE *opcode)
 				access.type = acread;
 				access.indexed = (op->mem.base != X86_REG_NO) || (op->mem.index != X86_REG_NO);
 				access.size = op->size;
-				if (strcmp(o->name, "cmp")==0 || strcmp(o->name, "test")==0 || strcmp(o->name, "push")==0) {
+				if (strcmp(o->name, "cmp")==0 || strcmp(o->name, "test")==0 || strcmp(o->name, "push")==0 ||
+					strcmp(o->name, "fld")==0 || strcmp(o->name, "~fld")==0) {
 					xref = xrefread;
 				} else {
 					xref = (i==0) ? xrefwrite : xrefread;

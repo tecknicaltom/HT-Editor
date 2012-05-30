@@ -347,7 +347,7 @@ public:
 		bool	  	continueAnalysis();
 		void		continueAnalysisAt(Address *Addr);
 	virtual	Address *	createAddress() = 0;
-		void		dataAccess(Address *Addr, taccess access);
+		void		dataAccess(Address *Addr, taccess access, bool is_float=false);
 		void		deleteLocation(Address *Addr);
 		void		deleteSymbol(Address *Addr);
 		bool		deleteXRef(Address *from, Address *to);

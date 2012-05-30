@@ -450,6 +450,67 @@ void AnalyserOutput::generateAddr(Address *Addr, OutAddr *oa)
 						}
 						break;
 					}
+					case dt_float: {
+						bytes_line = want_bytes_line = cur_addr->type.length;
+						assert(cur_addr->type.length);
+						if (analy->validAddress(addr, scinitialized)) {
+							char buf[50];
+							switch (cur_addr->type.float_subtype) {
+							case dst_fsingle: {
+								float c;
+								analy->bufPtr(addr, (byte *)&c, 4);
+								sprintf(buf, "dd          \\@n%f", c);
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, buf);
+								break;
+							}
+							case dst_fdouble: {
+								double c;
+								analy->bufPtr(addr, (byte *)&c, 8);
+								sprintf(buf, "dq          \\@n%f", c);
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, buf);
+								break;
+							}
+							/*
+							case dst_iqword: {
+								uint64 c;
+								analy->bufPtr(addr, (byte *)&c, 8);
+								ht_snprintf(buf, sizeof buf, "dq          \\@n%016qxh", c);
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, buf);
+								break;
+							}
+							case dst_ibyte:
+							default: {
+								byte c;
+								if (analy->bufPtr(addr, &c, 1)==1) {
+									sprintf(buf, "db          \\@n%02xh ", c);
+									putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, buf);
+									sprintf(buf, "; '%c'", (c<32)?32:c);
+									putElement(ELEMENT_TYPE_COMMENT, buf);
+								} else {
+									putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, "db          ??");
+								}
+							}
+							*/
+							}
+						} else {
+							// not initialized
+							switch (cur_addr->type.int_subtype) {
+							case dst_iword:
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, "dw          ????");
+								break;
+							case dst_idword:
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, "dd          ????????");
+								break;
+							case dst_iqword:
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, "dq          ????????????????");
+								break;
+							case dst_ibyte:
+							default:
+								putElement(ELEMENT_TYPE_HIGHLIGHT_DATA_CODE, "db          ??");
+							}
+						}
+						break;
+					}
 					case dt_array: {
 						if (analy->validAddress(addr, scinitialized)) {
 							switch (cur_addr->type.array_subtype) {

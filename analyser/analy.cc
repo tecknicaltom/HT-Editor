@@ -1017,7 +1017,7 @@ Assembler *Analyser::createAssembler()
 /*
  *
  */
-void	Analyser::dataAccess(Address *Addr, taccess access)
+void	Analyser::dataAccess(Address *Addr, taccess access, bool is_float)
 {
 	if (!validAddress(Addr, scvalid)) {
 		char	msg[100];
@@ -1074,7 +1074,17 @@ void	Analyser::dataAccess(Address *Addr, taccess access)
 			switch (access.size) {
 				case 1: data->setIntAddressType(Addr, dst_ibyte, 1); break;
 				case 2: data->setIntAddressType(Addr, dst_iword, 2); break;
-				case 4: data->setIntAddressType(Addr, dst_idword, 4); break;
+				case 4:
+					if (is_float) {
+						data->setFloatAddressType(Addr, dst_fsingle, 4);
+					} else {
+						data->setIntAddressType(Addr, dst_idword, 4);
+					}
+					break;
+				case 8:
+					if (is_float) {
+						data->setFloatAddressType(Addr, dst_fdouble, 8); break;
+					}
 			}
 		}
 		if (validAddress(Addr, scinitialized)) {

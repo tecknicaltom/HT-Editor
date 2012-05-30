@@ -613,7 +613,8 @@ void	AnalyX86Disassembler::examineOpcode(OPCODE *opcode)
 		}
 		if (addr) {
 			if (analy->validAddress(addr, scvalid)) {
-				analy->dataAccess(addr, access);
+				bool is_float = o->name[0] == 'f' || (o->name[0] == '~' && o->name[1] == 'f');
+				analy->dataAccess(addr, access, is_float);
 				analy->addXRef(addr, analy->addr, xref);
 			}
 			delete addr;

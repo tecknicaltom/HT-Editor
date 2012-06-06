@@ -34,6 +34,7 @@
 #define ATOM_ANALY_PPC		MAGIC32("AAS\x05")
 #define ATOM_ANALY_ARM          MAGIC32("AAS\x06")
 #define ATOM_ANALY_AVR          MAGIC32("AAS\x07")
+#define ATOM_ANALY_MIPS         MAGIC32("AAS\x08")
 
 /*
  *	ANX.: analyser objects

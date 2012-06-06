@@ -184,6 +184,7 @@ public:
 #define ATOM_DISASM_X86_64	MAGIC32("DIS\x08")
 #define ATOM_DISASM_ARM         MAGIC32("DIS\x09")
 #define ATOM_DISASM_AVR         MAGIC32("DIS\x0a")
+#define ATOM_DISASM_MIPS        MAGIC32("DIS\x0b")
 
 #define ASM_SYNTAX_DEFAULT "\\@d"
 #define ASM_SYNTAX_COMMENT "\\@#"

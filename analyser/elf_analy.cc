@@ -27,6 +27,7 @@
 #include "analy_x86.h"
 #include "analy_arm.h"
 #include "analy_avr.h"
+#include "analy_mips.h"
 #include "elf_analy.h"
 
 #include "htctrl.h"
@@ -801,6 +802,15 @@ void ElfAnalyser::initUnasm()
 			DPRINTF("initing analy_avr_disassembler\n");
 			analy_disasm = new AnalyAVRDisassembler();
 			((AnalyAVRDisassembler*)analy_disasm)->init(this);
+		}
+		break;
+	case ELF_EM_MIPS:
+		if (elf_shared->ident.e_ident[ELF_EI_CLASS] != ELFCLASS32) {
+			errorbox("No disassembler for 64-Bit MIPS.");
+		} else {
+			DPRINTF("initing analy_mips_disassembler\n");
+			analy_disasm = new AnalyMIPSDisassembler();
+			((AnalyMIPSDisassembler*)analy_disasm)->init(this);
 		}
 		break;
 	default:

@@ -1,6 +1,6 @@
 /*
  *	HT Editor
- *	avrdis.h
+ *	mipsdis.h
  *
  *	Copyright (C) 1999-2002 Sebastian Biallas (sb@biallas.net)
  *
@@ -18,16 +18,16 @@
  *	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __AVR_DIS_H__
-#define __AVR_DIS_H__
+#ifndef __MIPS_DIS_H__
+#define __MIPS_DIS_H__
 
 #include "asm.h"
 #include "io/types.h"
-#include "avropc.h"
+#include "mipsopc.h"
 
-struct avrdis_operand {
+struct mipsdis_operand {
 	int flags;
-	const avr_operand *op;
+	const mips_operand *op;
 	union {
 		int reg;    // general register
 		int freg;   // float register
@@ -47,22 +47,22 @@ struct avrdis_operand {
 	};
 };
 
-struct avrdis_insn {
+struct mipsdis_insn {
 	bool			valid;
 	int			size;
 	const char *		name;
 	uint32			data;
 	int			ops;
-	avrdis_operand		op[8];
+	mipsdis_operand		op[8];
 };
 
-class AVRDisassembler: public Disassembler {
+class MIPSDisassembler: public Disassembler {
 protected:
 	char insnstr[256];
-	avrdis_insn insn;
+	mipsdis_insn insn;
 public:
-			AVRDisassembler();
-			AVRDisassembler(BuildCtorArg&a): Disassembler(a) {};
+			MIPSDisassembler();
+			MIPSDisassembler(BuildCtorArg&a): Disassembler(a) {};
 
 	virtual	dis_insn	*decode(byte *code, int maxlen, CPU_ADDR addr);
 	virtual	dis_insn	*duplicateInsn(dis_insn *disasm_insn);

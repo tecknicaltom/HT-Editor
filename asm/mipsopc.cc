@@ -23,6 +23,21 @@
 #include <cstdio>
 #include "mipsopc.h"
 
+const char *mips_reg_names[] = {
+/*     0 */ "zero",
+/*     1 */ "$at",
+/*  2- 3 */ "$v0", "$v1",
+/*  4- 7 */ "$a0", "$a1", "$a2", "$a3",
+/*  8-15 */ "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
+/* 16-23 */ "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", 
+/* 24-25 */ "$t8", "$t9",
+/* 26-27 */ "$k0", "$k1",
+/*    28 */ "$gp",
+/*    29 */ "$sp",
+/*    30 */ "$fp",
+/*    31 */ "$ra",
+};
+
 #undef UNUSED
 
 const struct mips_operand mips_operands[] =
@@ -152,11 +167,15 @@ const struct mips_operand mips_operands[] =
 #define OP_FORMAT_MASK   0x02e00000
 #define OP_EXT_MASK      0x001f0000
 #define OP_INSTR_MASK    0xffffffff
+#define OP_RT_MASK       0x001f0000
 
 #define OP_R_MASK OP_MASK|OP_FUNCTION_MASK
 
 const struct mips_opcode mips_opcodes[] = {
 { "nop",    OP_INSTR_MASK, 0, {0} },
+
+// move pseudoinstruction
+{ "move",   OP_R_MASK|OP_RT_MASK, OPCODE(0)|FUNCTION(0x21), {Rd, Rs} },
 
 { "add",    OP_R_MASK, OPCODE(0)|FUNCTION(0x20), {Rd, Rs, Rt} },
 { "addu",   OP_R_MASK, OPCODE(0)|FUNCTION(0x21), {Rd, Rs, Rt} },

@@ -93,6 +93,7 @@ struct mips_operand
 
 extern const struct mips_operand mips_operands[];
 
+extern const char *mips_reg_names[];
 
 #define MIPS_OPERAND_X   1
 #define MIPS_OPERAND_XP  2

@@ -207,6 +207,8 @@ const char *MIPSDisassembler::strf(dis_insn *disasm_insn, int style, const char 
 			}
 			if (flags & MIPS_OPERAND_GPR) {
 				is += sprintf(is, "%s%s", cs_default, mips_reg_names[mips_insn->op[opidx].reg]);
+			} else if (flags & MIPS_OPERAND_GPR_2) {
+				is += sprintf(is, "%s$f%d", cs_default, mips_insn->op[opidx].reg);
 				/*
 			} else if (flags & MIPS_OPERAND_GPR_2) {
 				is += sprintf(is, "%sr%d%s:%sr%d", cs_default, mips_insn->op[opidx].reg, cs_symbol, cs_default, mips_insn->op[opidx].reg+1);

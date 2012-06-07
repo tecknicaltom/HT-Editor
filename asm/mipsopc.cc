@@ -73,6 +73,17 @@ const struct mips_operand mips_operands[] =
 
 #define Base ImmOffs + 1
   { 5, 21, 0, 0, 0, MIPS_OPERAND_GPR },
+
+#define Ft Base + 1
+  { 5, 16, 0, 0, 0, MIPS_OPERAND_GPR_2 },
+
+#define Fs Ft + 1
+  { 5, 11, 0, 0, 0, MIPS_OPERAND_GPR_2 },
+
+#define Fd Fs + 1
+  { 5, 6, 0, 0, 0, MIPS_OPERAND_GPR_2 },
+
+
   /*
 #define Rd UNUSED + 1
   { 5, 4, 0, 0, 0, AVR_OPERAND_GPR },
@@ -160,65 +171,96 @@ const struct mips_operand mips_operands[] =
 
 #define OPCODE(o)      (o<<26)
 #define FUNCTION(f)    (f)
+#define FUNCTION_EXT(f)    (f<<5)
 #define OPCODE_EXT(o)  (o<<16)
+#define RS(r)          (r<<21)
+#define RT(r)          (r<<16)
+#define FT(r)          (r<<16)
+#define RD(r)          (r<<11)
+#define FMT(f)      (f<<21)
 
 #define OP_MASK          0xfc000000
-#define OP_FUNCTION_MASK 0x0000003f
-#define OP_FORMAT_MASK   0x02e00000
-#define OP_EXT_MASK      0x001f0000
-#define OP_INSTR_MASK    0xffffffff
+#define OP_RS_MASK       0x03e00000
+#define OP_FMT_MASK   0x03e00000
 #define OP_RT_MASK       0x001f0000
+#define OP_FT_MASK       0x001f0000
+#define OP_RD_MASK       0x0000f800
+#define OP_EXT_MASK      0x001f0000
+#define OP_FUNCTION_EXT_MASK 0x000007c0
+#define OP_FUNCTION_MASK 0x0000003f
+#define OP_INSTR_MASK    0xffffffff
 
-#define OP_R_MASK OP_MASK|OP_FUNCTION_MASK
+
+#define OP_RTYPE_MASK OP_MASK|OP_FUNCTION_MASK
 
 const struct mips_opcode mips_opcodes[] = {
 { "nop",    OP_INSTR_MASK, 0, {0} },
 
-// move pseudoinstruction
-{ "move",   OP_R_MASK|OP_RT_MASK, OPCODE(0)|FUNCTION(0x21), {Rd, Rs} },
+// move pseudoinstruction. addu Rd, Rs, zero
+{ "move",   OP_RTYPE_MASK|OP_RT_MASK, OPCODE(0)|FUNCTION(0x21)|RT(0), {Rd, Rs} },
+// for instr jalr, Rd=$ra=31 is implied. Hide Rd if Rd=31
+{ "jalr",   OP_RTYPE_MASK|OP_RD_MASK, OPCODE(0)|FUNCTION(0x09)|RD(31), {Rs} },
+// negu pseudoinstruction. subu Rd, zero, Rt
+{ "negu",   OP_RTYPE_MASK|OP_RS_MASK, OPCODE(0)|FUNCTION(0x23)|RS(0), {Rd, Rt} },
 
-{ "add",    OP_R_MASK, OPCODE(0)|FUNCTION(0x20), {Rd, Rs, Rt} },
-{ "addu",   OP_R_MASK, OPCODE(0)|FUNCTION(0x21), {Rd, Rs, Rt} },
-{ "and",    OP_R_MASK, OPCODE(0)|FUNCTION(0x24), {Rd, Rs, Rt} },
-{ "break",  OP_R_MASK, OPCODE(0)|FUNCTION(0x0d), {0} },
-{ "div",    OP_R_MASK, OPCODE(0)|FUNCTION(0x1a), {Rs, Rt} },
-{ "divu",   OP_R_MASK, OPCODE(0)|FUNCTION(0x1b), {Rs, Rt} },
-{ "jalr",   OP_R_MASK, OPCODE(0)|FUNCTION(0x09), {Rd, Rs} },
-{ "jr",     OP_R_MASK, OPCODE(0)|FUNCTION(0x08), {Rs} },
-{ "mfhi",   OP_R_MASK, OPCODE(0)|FUNCTION(0x10), {Rd} },
-{ "mflo",   OP_R_MASK, OPCODE(0)|FUNCTION(0x12), {Rd} },
-{ "mthi",   OP_R_MASK, OPCODE(0)|FUNCTION(0x11), {Rs} },
-{ "mtlo",   OP_R_MASK, OPCODE(0)|FUNCTION(0x13), {Rs} },
-{ "mult",   OP_R_MASK, OPCODE(0)|FUNCTION(0x18), {Rs, Rt} },
-{ "multu",  OP_R_MASK, OPCODE(0)|FUNCTION(0x19), {Rs, Rt} },
-{ "nor",    OP_R_MASK, OPCODE(0)|FUNCTION(0x27), {Rd, Rs, Rt} },
-{ "or",     OP_R_MASK, OPCODE(0)|FUNCTION(0x25), {Rd, Rs, Rt} },
-{ "sll",    OP_R_MASK, OPCODE(0)|FUNCTION(0x00), {Rd, Rt, Sa} },
-{ "sllv",   OP_R_MASK, OPCODE(0)|FUNCTION(0x04), {Rd, Rt, Rs} },
-{ "slt",    OP_R_MASK, OPCODE(0)|FUNCTION(0x2a), {Rd, Rs, Rt} },
-{ "sltu",   OP_R_MASK, OPCODE(0)|FUNCTION(0x2b), {Rd, Rs, Rt} },
-{ "sra",    OP_R_MASK, OPCODE(0)|FUNCTION(0x03), {Rd, Rt, Sa} },
-{ "srav",   OP_R_MASK, OPCODE(0)|FUNCTION(0x07), {Rd, Rt, Rs} },
-{ "srl",    OP_R_MASK, OPCODE(0)|FUNCTION(0x02), {Rd, Rt, Sa} },
-{ "srlv",   OP_R_MASK, OPCODE(0)|FUNCTION(0x06), {Rd, Rt, Rs} },
-{ "sub",    OP_R_MASK, OPCODE(0)|FUNCTION(0x22), {Rd, Rs, Rt} },
-{ "subu",   OP_R_MASK, OPCODE(0)|FUNCTION(0x23), {Rd, Rs, Rt} },
-{ "syscall",OP_R_MASK, OPCODE(0)|FUNCTION(0x0c), {0} },
-{ "xor",    OP_R_MASK, OPCODE(0)|FUNCTION(0x26), {Rd, Rs, Rt} },
+{ "add",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x20), {Rd, Rs, Rt} },
+{ "addu",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x21), {Rd, Rs, Rt} },
+{ "and",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x24), {Rd, Rs, Rt} },
+{ "break",  OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x0d), {0} },
+{ "div",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x1a), {Rs, Rt} },
+{ "divu",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x1b), {Rs, Rt} },
+{ "jalr",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x09), {Rd, Rs} },
+{ "jr",     OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x08), {Rs} },
+{ "mfhi",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x10), {Rd} },
+{ "mflo",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x12), {Rd} },
+{ "mthi",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x11), {Rs} },
+{ "mtlo",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x13), {Rs} },
+{ "mult",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x18), {Rs, Rt} },
+{ "multu",  OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x19), {Rs, Rt} },
+{ "nor",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x27), {Rd, Rs, Rt} },
+{ "or",     OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x25), {Rd, Rs, Rt} },
+{ "sll",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x00), {Rd, Rt, Sa} },
+{ "sllv",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x04), {Rd, Rt, Rs} },
+{ "slt",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x2a), {Rd, Rs, Rt} },
+{ "sltu",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x2b), {Rd, Rs, Rt} },
+{ "sra",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x03), {Rd, Rt, Sa} },
+{ "srav",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x07), {Rd, Rt, Rs} },
+{ "srl",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x02), {Rd, Rt, Sa} },
+{ "srlv",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x06), {Rd, Rt, Rs} },
+{ "sub",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x22), {Rd, Rs, Rt} },
+{ "subu",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x23), {Rd, Rs, Rt} },
+{ "syscall",OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x0c), {0} },
+{ "xor",    OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x26), {Rd, Rs, Rt} },
+
+// b pseudoinstruction. beq zero, zero, offset
+{ "b",      OP_MASK|OP_RS_MASK|OP_RT_MASK,   OPCODE(0x04)|RT(0), {Label} },
+// li pseudoinstruction. addiu Rt, zero, imm
+{ "li",     OP_MASK|OP_RS_MASK,   OPCODE(0x09)|RS(0), {Rt, Imm} },
+// li pseudoinstruction. ori Rt, zero, imm
+{ "li",     OP_MASK|OP_RS_MASK,   OPCODE(0x0d)|RS(0), {Rt, Imm} },
+// beqz pseudoinstruction. beq Rs, zero, Label
+{ "beqz",   OP_MASK|OP_RT_MASK,   OPCODE(0x04)|RT(0), {Rs, Label} },
+// bnez pseudoinstruction. bne Rs, zero, Label
+{ "bnez",   OP_MASK|OP_RT_MASK,   OPCODE(0x05)|RT(0), {Rs, Label} },
+// bal pseudoinstruction. bgezal zero, Label
+{ "bal",    OP_MASK|OP_EXT_MASK|OP_RS_MASK, OPCODE(0x01)|OPCODE_EXT(0x11)|RS(0), {Label} },
 
 { "addi",   OP_MASK,   OPCODE(0x08), {Rt, Rs, Imm} },
 { "addiu",  OP_MASK,   OPCODE(0x09), {Rt, Rs, Imm} },
 { "andi",   OP_MASK,   OPCODE(0x0c), {Rt, Rs, Imm} },
 { "beq",    OP_MASK,   OPCODE(0x04), {Rs, Rt, Label} },
 { "bgez",   OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x01), {Rs, Label} },
+{ "bltz",   OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x00), {Rs, Label} },
+{ "bgezal", OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x11), {Rs, Label} },
 { "bgtz",   OP_MASK|OP_EXT_MASK, OPCODE(0x07)|OPCODE_EXT(0x00), {Rs, Label} },
 { "blez",   OP_MASK|OP_EXT_MASK, OPCODE(0x06)|OPCODE_EXT(0x00), {Rs, Label} },
-{ "bltz",   OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x00), {Rs, Label} },
 { "bne",    OP_MASK,             OPCODE(0x05),                  {Rs, Rt, Label} },
 { "lb",     OP_MASK,             OPCODE(0x20),                  {Rt, ImmOffs, Base} },
 { "lbu",    OP_MASK,             OPCODE(0x24),                  {Rt, ImmOffs, Base} },
 { "lh",     OP_MASK,             OPCODE(0x21),                  {Rt, ImmOffs, Base} },
+{ "lwl",    OP_MASK,             OPCODE(0x22),                  {Rt, ImmOffs, Base} },
 { "lhu",    OP_MASK,             OPCODE(0x25),                  {Rt, ImmOffs, Base} },
+{ "lwr",    OP_MASK,             OPCODE(0x26),                  {Rt, ImmOffs, Base} },
 { "lui",    OP_MASK,             OPCODE(0x0f),                  {Rt, Imm} },
 { "lw",     OP_MASK,             OPCODE(0x23),                  {Rt, ImmOffs, Base} },
 { "lwc1",   OP_MASK,             OPCODE(0x31),                  {Rt, ImmOffs, Base} },
@@ -227,10 +269,34 @@ const struct mips_opcode mips_opcodes[] = {
 { "slti",   OP_MASK,             OPCODE(0x0a),                  {Rt, Rs, Imm} },
 { "sltiu",  OP_MASK,             OPCODE(0x0b),                  {Rt, Rs, Imm} },
 { "sh",     OP_MASK,             OPCODE(0x29),                  {Rt, ImmOffs, Base} },
+{ "swl",    OP_MASK,             OPCODE(0x2a),                  {Rt, ImmOffs, Base} },
 { "sw",     OP_MASK,             OPCODE(0x2b),                  {Rt, ImmOffs, Base} },
+{ "swr",    OP_MASK,             OPCODE(0x2e),                  {Rt, ImmOffs, Base} },
 { "swc1",   OP_MASK,             OPCODE(0x39),                  {Rt, ImmOffs, Base} },
 { "xori",   OP_MASK,             OPCODE(0x0e),                  {Rt, Rs, Imm} },
 
+// coprocessor commands
+	// floating point coprocessor commands
+{ "mov.s",  OP_MASK|OP_FMT_MASK|OP_FT_MASK|OP_FUNCTION_MASK,  OPCODE(0x11)|FMT(0x10)|FT(0)|FUNCTION(0x06),  {Fd, Fs} },
+{ "mov.d",  OP_MASK|OP_FMT_MASK|OP_FT_MASK|OP_FUNCTION_MASK,  OPCODE(0x11)|FMT(0x11)|FT(0)|FUNCTION(0x06),  {Fd, Fs} },
+{ "mfc1",   OP_MASK|OP_FMT_MASK|OP_FUNCTION_MASK|OP_FUNCTION_EXT_MASK,  OPCODE(0x11)|FMT(0x00)|FUNCTION(0)|FUNCTION_EXT(0),  {Rt, Fs} },
+{ "cfc1",   OP_MASK|OP_FMT_MASK|OP_FUNCTION_MASK|OP_FUNCTION_EXT_MASK,  OPCODE(0x11)|FMT(0x02)|FUNCTION(0)|FUNCTION_EXT(0),  {Rt, Fs} },
+{ "mtc1",   OP_MASK|OP_FMT_MASK|OP_FUNCTION_MASK|OP_FUNCTION_EXT_MASK,  OPCODE(0x11)|FMT(0x04)|FUNCTION(0)|FUNCTION_EXT(0),  {Rt, Fs} },
+{ "ctc1",   OP_MASK|OP_FMT_MASK|OP_FUNCTION_MASK|OP_FUNCTION_EXT_MASK,  OPCODE(0x11)|FMT(0x06)|FUNCTION(0)|FUNCTION_EXT(0),  {Rt, Fs} },
+{ "neg.s",  OP_MASK|OP_FMT_MASK|OP_FT_MASK|OP_FUNCTION_MASK,            OPCODE(0x11)|FMT(0x10)|FT(0)|FUNCTION(0x07),         {Fd, Fs} },
+{ "neg.d",  OP_MASK|OP_FMT_MASK|OP_FT_MASK|OP_FUNCTION_MASK,            OPCODE(0x11)|FMT(0x11)|FT(0)|FUNCTION(0x07),         {Fd, Fs} },
+
+/*
+{ "add.s",    OP_MASK|OP_FORMAT_MASK|OP_FUNCTION_MASK,  OPCODE(0x 	fd, fs, ft 	000000 	10000
+{ "cvt.s.w 	fd, fs, ft 	100000 	10100
+{ "cvt.w.s 	fd, fs, ft 	100100 	10000
+{ "div.s 	fd, fs, ft 	000011 	10000
+{ "mfc1 	ft, fs 	000000 	00000
+{ "mov.s 	fd, fs 	000110 	10000
+{ "mtc1 	ft, fs 	000000 	00100
+{ "mul.s 	fd, fs, ft 	000010 	10000
+{ "sub.s 	fd, fs, ft 	000001 	10000 
+*/
 	/*
 { "nop",    OP_MASK, 0x0000, {0} },
 

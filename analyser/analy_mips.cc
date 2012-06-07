@@ -43,7 +43,8 @@ ObjectID AnalyMIPSDisassembler::getObjectID() const
 Address *AnalyMIPSDisassembler::branchAddr(OPCODE *opcode, branch_enum_t branchtype, bool examine)
 {
 	Address *a;
-	a = createAddress(((mipsdis_insn *)opcode)->op[0].imm);
+	int ops = ((mipsdis_insn *)opcode)->ops;
+	a = createAddress(((mipsdis_insn *)opcode)->op[ops - 1].imm);
 	if (/*examine &&*/ analy->validAddress(a, scvalid)) {
 		return a;
 	}
@@ -76,8 +77,18 @@ branch_enum_t AnalyMIPSDisassembler::isBranch(OPCODE *opcode)
 	    return br_call;
 	}
 	if (strcmp(name, "b") == 0 ||
-		0) {
+		0
+		) {
 	    return br_jump;
+	}
+	if (strcmp(name, "jr") == 0 && mips_insn->op[0].reg == 31 /* $ra */) {
+		return br_return;
+	}
+	if (strcmp(name, "beq") == 0 ||
+		strcmp(name, "beqz") == 0 ||
+		0
+		) {
+		return br_jXX;
 	}
 	/*
 	if (strcmp(name, "ret") == 0

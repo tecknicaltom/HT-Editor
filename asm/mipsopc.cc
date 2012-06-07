@@ -66,7 +66,7 @@ const struct mips_operand mips_operands[] =
   { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM },
 
 #define Label Imm + 1
-  { 16, 0, 0, 0, 0, MIPS_OPERAND_REL },
+  { 16, 0, 0, 2, 0, MIPS_OPERAND_REL | MIPS_OPERAND_SIGNED },
 
 #define ImmOffs Label + 1
   { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM | MIPS_OPERAND_PARENS },
@@ -263,7 +263,7 @@ const struct mips_opcode mips_opcodes[] = {
 { "lwr",    OP_MASK,             OPCODE(0x26),                  {Rt, ImmOffs, Base} },
 { "lui",    OP_MASK,             OPCODE(0x0f),                  {Rt, Imm} },
 { "lw",     OP_MASK,             OPCODE(0x23),                  {Rt, ImmOffs, Base} },
-{ "lwc1",   OP_MASK,             OPCODE(0x31),                  {Rt, ImmOffs, Base} },
+{ "lwc1",   OP_MASK,             OPCODE(0x31),                  {Ft, ImmOffs, Base} },
 { "ori",    OP_MASK,             OPCODE(0x0d),                  {Rt, Rs, Imm} },
 { "sb",     OP_MASK,             OPCODE(0x28),                  {Rt, ImmOffs, Base} },
 { "slti",   OP_MASK,             OPCODE(0x0a),                  {Rt, Rs, Imm} },
@@ -272,7 +272,7 @@ const struct mips_opcode mips_opcodes[] = {
 { "swl",    OP_MASK,             OPCODE(0x2a),                  {Rt, ImmOffs, Base} },
 { "sw",     OP_MASK,             OPCODE(0x2b),                  {Rt, ImmOffs, Base} },
 { "swr",    OP_MASK,             OPCODE(0x2e),                  {Rt, ImmOffs, Base} },
-{ "swc1",   OP_MASK,             OPCODE(0x39),                  {Rt, ImmOffs, Base} },
+{ "swc1",   OP_MASK,             OPCODE(0x39),                  {Ft, ImmOffs, Base} },
 { "xori",   OP_MASK,             OPCODE(0x0e),                  {Rt, Rs, Imm} },
 
 // coprocessor commands

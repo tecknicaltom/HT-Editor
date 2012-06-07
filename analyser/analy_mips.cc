@@ -70,14 +70,16 @@ branch_enum_t AnalyMIPSDisassembler::isBranch(OPCODE *opcode)
 {
 	mipsdis_insn *mips_insn = (mipsdis_insn *) opcode;
 	const char *name = mips_insn->name;
-	if (strcmp(name, "call") == 0
-	 || strcmp(name, "rcall") == 0) {
+	if (strcmp(name, "jalr") == 0 ||
+		strcmp(name, "jal") == 0 ||
+		strcmp(name, "bal") == 0) {
 	    return br_call;
 	}
-	if (strcmp(name, "jmp") == 0
-	 || strcmp(name, "rjmp") == 0) {
+	if (strcmp(name, "b") == 0 ||
+		0) {
 	    return br_jump;
 	}
+	/*
 	if (strcmp(name, "ret") == 0
 	 || strcmp(name, "reti") == 0) {
 	    return br_return;
@@ -103,6 +105,7 @@ branch_enum_t AnalyMIPSDisassembler::isBranch(OPCODE *opcode)
 	 || strcmp(name, "brvs") == 0) {
 	    return br_jXX;
 	}
+	*/
 #if 0
 	// FIXME: needs work!!
 	ppcdis_insn *ppc_insn = (ppcdis_insn *) opcode;

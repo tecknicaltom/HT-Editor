@@ -26,9 +26,9 @@
 #include "htiobox.h"
 #include "snprintf.h"
 
-void AnalyMIPSDisassembler::init(Analyser *A)
+void AnalyMIPSDisassembler::init(Analyser *A, Endianess endianess)
 {
-	disasm = new MIPSDisassembler();
+	disasm = new MIPSDisassembler(endianess);
 	AnalyDisassembler::init(A);
 }
 

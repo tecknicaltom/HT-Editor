@@ -23,13 +23,14 @@
 
 #include "analy.h"
 #include "mipsdis.h"
+#include "endianess.h"
 
 class AnalyMIPSDisassembler: public AnalyDisassembler {
 public:
 				AnalyMIPSDisassembler() {};
 				AnalyMIPSDisassembler(BuildCtorArg&a): AnalyDisassembler(a) {};
 
-		void		init(Analyser *A);
+		void		init(Analyser *A, Endianess endianess);
 	virtual	ObjectID	getObjectID() const;
 
 	virtual	Address		*branchAddr(OPCODE *opcode, branch_enum_t branchtype, bool examine);

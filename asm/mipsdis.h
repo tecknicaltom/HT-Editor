@@ -24,6 +24,7 @@
 #include "asm.h"
 #include "io/types.h"
 #include "mipsopc.h"
+#include "endianess.h"
 
 struct mipsdis_operand {
 	int flags;
@@ -60,10 +61,12 @@ class MIPSDisassembler: public Disassembler {
 protected:
 	char insnstr[256];
 	mipsdis_insn insn;
+	Endianess endianess;
 public:
-			MIPSDisassembler();
+			MIPSDisassembler(Endianess endianess);
 			MIPSDisassembler(BuildCtorArg&a): Disassembler(a) {};
 
+		void		load(ObjectStream &f);
 	virtual	dis_insn	*decode(byte *code, int maxlen, CPU_ADDR addr);
 	virtual	dis_insn	*duplicateInsn(dis_insn *disasm_insn);
 	virtual	void		getOpcodeMetrics(int &min_length, int &max_length, int &min_look_ahead, int &avg_look_ahead, int &addr_align);
@@ -73,6 +76,7 @@ public:
 	virtual	const char	*strf(dis_insn *disasm_insn, int style, const char *format);
 	virtual	ObjectID	getObjectID() const;
 	virtual	bool		validInsn(dis_insn *disasm_insn);
+	virtual void		store(ObjectStream &f) const;
 };
 
 #endif

@@ -24,8 +24,17 @@
 #include "snprintf.h"
 #include "tools.h"
 
-MIPSDisassembler::MIPSDisassembler()
+MIPSDisassembler::MIPSDisassembler(Endianess endianess)
 {
+	this->endianess = endianess;
+}
+
+void MIPSDisassembler::load(ObjectStream &f)
+{
+	Disassembler::load(f);
+	bool le;
+	GET_BOOL(f, le);
+	endianess = le ? little_endian : big_endian;
 }
 
 dis_insn *MIPSDisassembler::decode(byte *code, int maxlen, CPU_ADDR addr)
@@ -41,7 +50,7 @@ dis_insn *MIPSDisassembler::decode(byte *code, int maxlen, CPU_ADDR addr)
 	}
 
 	insn.size = 4;
-	insn.data = createHostInt(code, 4, little_endian);
+	insn.data = createHostInt(code, 4, endianess);
 
 	/*
 	if ((insn.data & 0xfe0c) == 0x940c || (insn.data & 0xfc0f) == 0x9000) {
@@ -301,6 +310,12 @@ const char *MIPSDisassembler::strf(dis_insn *disasm_insn, int style, const char 
 ObjectID MIPSDisassembler::getObjectID() const
 {
 	return ATOM_DISASM_MIPS;
+}
+
+void MIPSDisassembler::store(ObjectStream &f) const
+{
+	bool le = endianess == little_endian;
+	PUT_INT32X(f, le);
 }
 
 bool MIPSDisassembler::validInsn(dis_insn *disasm_insn)

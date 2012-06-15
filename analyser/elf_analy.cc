@@ -810,7 +810,7 @@ void ElfAnalyser::initUnasm()
 		} else {
 			DPRINTF("initing analy_mips_disassembler\n");
 			analy_disasm = new AnalyMIPSDisassembler();
-			((AnalyMIPSDisassembler*)analy_disasm)->init(this);
+			((AnalyMIPSDisassembler*)analy_disasm)->init(this, elf_shared->byte_order);
 		}
 		break;
 	default:

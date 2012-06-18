@@ -60,7 +60,7 @@ const struct mips_operand mips_operands[] =
   { 5, 11, 0, 0, 0, MIPS_OPERAND_GPR },
 
 #define Sa Rd + 1
-  { 5, 6, 0, 0, 0, MIPS_OPERAND_GPR },
+  { 5, 6, 0, 0, 0, MIPS_OPERAND_IMM },
 
 #define Imm Sa + 1
   { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM },
@@ -83,6 +83,8 @@ const struct mips_operand mips_operands[] =
 #define Fd Fs + 1
   { 5, 6, 0, 0, 0, MIPS_OPERAND_GPR_2 },
 
+#define TrapCode Fd + 1
+  { 10, 6, 0, 0, 0, MIPS_OPERAND_IMM },
 
   /*
 #define Rd UNUSED + 1
@@ -189,6 +191,7 @@ const struct mips_operand mips_operands[] =
 #define OP_FUNCTION_EXT_MASK 0x000007c0
 #define OP_FUNCTION_MASK 0x0000003f
 #define OP_INSTR_MASK    0xffffffff
+#define OP_TRAP_CODE_MASK 0x0000ffa0
 
 
 #define OP_RTYPE_MASK OP_MASK|OP_FUNCTION_MASK
@@ -198,6 +201,8 @@ const struct mips_opcode mips_opcodes[] = {
 
 // move pseudoinstruction. addu Rd, Rs, zero
 { "move",   OP_RTYPE_MASK|OP_RT_MASK, OPCODE(0)|FUNCTION(0x21)|RT(0), {Rd, Rs} },
+// move pseudoinstruction. or Rd, Rs, zero
+{ "move",   OP_RTYPE_MASK|OP_RT_MASK, OPCODE(0)|FUNCTION(0x25)|RT(0), {Rd, Rs} },
 // for instr jalr, Rd=$ra=31 is implied. Hide Rd if Rd=31
 { "jalr",   OP_RTYPE_MASK|OP_RD_MASK, OPCODE(0)|FUNCTION(0x09)|RD(31), {Rs} },
 // negu pseudoinstruction. subu Rd, zero, Rt
@@ -213,6 +218,8 @@ const struct mips_opcode mips_opcodes[] = {
 { "jr",     OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x08), {Rs} },
 { "mfhi",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x10), {Rd} },
 { "mflo",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x12), {Rd} },
+{ "movz",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x0a), {Rd, Rs, Rt} },
+{ "movn",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x0b), {Rd, Rs, Rt} },
 { "mthi",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x11), {Rs} },
 { "mtlo",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x13), {Rs} },
 { "mult",   OP_RTYPE_MASK, OPCODE(0)|FUNCTION(0x18), {Rs, Rt} },
@@ -240,8 +247,12 @@ const struct mips_opcode mips_opcodes[] = {
 { "li",     OP_MASK|OP_RS_MASK,   OPCODE(0x0d)|RS(0), {Rt, Imm} },
 // beqz pseudoinstruction. beq Rs, zero, Label
 { "beqz",   OP_MASK|OP_RT_MASK,   OPCODE(0x04)|RT(0), {Rs, Label} },
+// beqzl pseudoinstruction. beql Rs, zero, Label
+{ "beqzl",  OP_MASK|OP_RT_MASK,   OPCODE(0x14)|RT(0), {Rs, Label} },
 // bnez pseudoinstruction. bne Rs, zero, Label
 { "bnez",   OP_MASK|OP_RT_MASK,   OPCODE(0x05)|RT(0), {Rs, Label} },
+// bnezl pseudoinstruction. bnel Rs, zero, Label
+{ "bnezl",  OP_MASK|OP_RT_MASK,   OPCODE(0x15)|RT(0), {Rs, Label} },
 // bal pseudoinstruction. bgezal zero, Label
 { "bal",    OP_MASK|OP_EXT_MASK|OP_RS_MASK, OPCODE(0x01)|OPCODE_EXT(0x11)|RS(0), {Label} },
 
@@ -249,12 +260,19 @@ const struct mips_opcode mips_opcodes[] = {
 { "addiu",  OP_MASK,   OPCODE(0x09), {Rt, Rs, Imm} },
 { "andi",   OP_MASK,   OPCODE(0x0c), {Rt, Rs, Imm} },
 { "beq",    OP_MASK,   OPCODE(0x04), {Rs, Rt, Label} },
-{ "bgez",   OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x01), {Rs, Label} },
+{ "beql",   OP_MASK,   OPCODE(0x14), {Rs, Rt, Label} },
 { "bltz",   OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x00), {Rs, Label} },
+{ "bgez",   OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x01), {Rs, Label} },
+{ "bltzl",  OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x02), {Rs, Label} },
+{ "bgezl",  OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x03), {Rs, Label} },
+{ "bltzal", OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x10), {Rs, Label} },
 { "bgezal", OP_MASK|OP_EXT_MASK, OPCODE(0x01)|OPCODE_EXT(0x11), {Rs, Label} },
 { "bgtz",   OP_MASK|OP_EXT_MASK, OPCODE(0x07)|OPCODE_EXT(0x00), {Rs, Label} },
 { "blez",   OP_MASK|OP_EXT_MASK, OPCODE(0x06)|OPCODE_EXT(0x00), {Rs, Label} },
+{ "blezl",  OP_MASK|OP_EXT_MASK, OPCODE(0x16)|OPCODE_EXT(0x00), {Rs, Label} },
+{ "bgtzl",  OP_MASK|OP_EXT_MASK, OPCODE(0x17)|OPCODE_EXT(0x00), {Rs, Label} },
 { "bne",    OP_MASK,             OPCODE(0x05),                  {Rs, Rt, Label} },
+{ "bnel",   OP_MASK,             OPCODE(0x15),                  {Rs, Rt, Label} },
 { "lb",     OP_MASK,             OPCODE(0x20),                  {Rt, ImmOffs, Base} },
 { "lbu",    OP_MASK,             OPCODE(0x24),                  {Rt, ImmOffs, Base} },
 { "lh",     OP_MASK,             OPCODE(0x21),                  {Rt, ImmOffs, Base} },
@@ -272,7 +290,11 @@ const struct mips_opcode mips_opcodes[] = {
 { "swl",    OP_MASK,             OPCODE(0x2a),                  {Rt, ImmOffs, Base} },
 { "sw",     OP_MASK,             OPCODE(0x2b),                  {Rt, ImmOffs, Base} },
 { "swr",    OP_MASK,             OPCODE(0x2e),                  {Rt, ImmOffs, Base} },
+{ "ll",     OP_MASK,             OPCODE(0x30),                  {Rt, ImmOffs, Base} },
+{ "ldc1",   OP_MASK,             OPCODE(0x35),                  {Ft, ImmOffs, Base} },
+{ "sc",     OP_MASK,             OPCODE(0x38),                  {Rt, ImmOffs, Base} },
 { "swc1",   OP_MASK,             OPCODE(0x39),                  {Ft, ImmOffs, Base} },
+{ "sdc1",   OP_MASK,             OPCODE(0x3d),                  {Ft, ImmOffs, Base} },
 { "xori",   OP_MASK,             OPCODE(0x0e),                  {Rt, Rs, Imm} },
 
 // coprocessor commands
@@ -286,6 +308,12 @@ const struct mips_opcode mips_opcodes[] = {
 { "neg.s",  OP_MASK|OP_FMT_MASK|OP_FT_MASK|OP_FUNCTION_MASK,            OPCODE(0x11)|FMT(0x10)|FT(0)|FUNCTION(0x07),         {Fd, Fs} },
 { "neg.d",  OP_MASK|OP_FMT_MASK|OP_FT_MASK|OP_FUNCTION_MASK,            OPCODE(0x11)|FMT(0x11)|FT(0)|FUNCTION(0x07),         {Fd, Fs} },
 
+// sync instruction- hardcoding stype=0 because stypes 1-31 are reserved for future extensions. bits 25-11 are zero, stype bits 10-6 are zero
+{ "sync",   OP_INSTR_MASK,   OPCODE(0x00)|FUNCTION(0x0f), {} },
+
+// non-immediate trap instructions have an optional 10-bit code which defaults to zero
+{ "teq",    OP_MASK|OP_TRAP_CODE_MASK|OP_FUNCTION_MASK, OPCODE(0x0)|FUNCTION(0x34),  {Rs, Rt}},
+{ "teq",    OP_MASK|OP_FUNCTION_MASK, OPCODE(0x0)|FUNCTION(0x34),  {Rs, Rt, TrapCode}},
 /*
 { "add.s",    OP_MASK|OP_FORMAT_MASK|OP_FUNCTION_MASK,  OPCODE(0x 	fd, fs, ft 	000000 	10000
 { "cvt.s.w 	fd, fs, ft 	100000 	10100

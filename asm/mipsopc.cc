@@ -63,13 +63,13 @@ const struct mips_operand mips_operands[] =
   { 5, 6, 0, 0, 0, MIPS_OPERAND_IMM },
 
 #define Imm Sa + 1
-  { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM },
+  { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM | MIPS_OPERAND_SIGNED },
 
 #define Label Imm + 1
   { 16, 0, 0, 2, 0, MIPS_OPERAND_REL | MIPS_OPERAND_SIGNED },
 
 #define ImmOffs Label + 1
-  { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM | MIPS_OPERAND_PARENS },
+  { 16, 0, 0, 0, 0, MIPS_OPERAND_IMM | MIPS_OPERAND_SIGNED | MIPS_OPERAND_PARENS },
 
 #define Base ImmOffs + 1
   { 5, 21, 0, 0, 0, MIPS_OPERAND_GPR },

@@ -118,7 +118,7 @@ dis_insn *MIPSDisassembler::decode(byte *code, int maxlen, CPU_ADDR addr)
 				}
 			}
 
-			if (operand->flags & (MIPS_OPERAND_GPR | MIPS_OPERAND_GPR_2)) {
+			if (operand->flags & (MIPS_OPERAND_GPR | MIPS_OPERAND_GPR_2 | MIPS_OPERAND_CTRLREG)) {
 				insn.op[opidx++].reg = value;
 			} else if (operand->flags & (MIPS_OPERAND_IMM | MIPS_OPERAND_ABS)) {
 				insn.op[opidx++].imm = value;
@@ -218,6 +218,8 @@ const char *MIPSDisassembler::strf(dis_insn *disasm_insn, int style, const char 
 				is += sprintf(is, "%s%s", cs_default, mips_reg_names[mips_insn->op[opidx].reg]);
 			} else if (flags & MIPS_OPERAND_GPR_2) {
 				is += sprintf(is, "%s$f%d", cs_default, mips_insn->op[opidx].reg);
+			} else if (flags & MIPS_OPERAND_CTRLREG) {
+				is += sprintf(is, "%s$%d", cs_default, mips_insn->op[opidx].reg);
 				/*
 			} else if (flags & MIPS_OPERAND_GPR_2) {
 				is += sprintf(is, "%sr%d%s:%sr%d", cs_default, mips_insn->op[opidx].reg, cs_symbol, cs_default, mips_insn->op[opidx].reg+1);

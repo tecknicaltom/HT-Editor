@@ -114,6 +114,7 @@ extern const char *mips_reg_names[];
 #define MIPS_OPERAND_SIGNED 256
 #define MIPS_OPERAND_ABS   512
 #define MIPS_OPERAND_REL   1024
+#define MIPS_OPERAND_CTRLREG   2048
 
 /* The next operand should be wrapped in parentheses rather than
    separated from this one by a comma.  This is used for the load and

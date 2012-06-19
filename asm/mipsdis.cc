@@ -317,7 +317,7 @@ ObjectID MIPSDisassembler::getObjectID() const
 void MIPSDisassembler::store(ObjectStream &f) const
 {
 	bool le = endianess == little_endian;
-	PUT_INT32X(f, le);
+	PUT_BOOL(f, le);
 }
 
 bool MIPSDisassembler::validInsn(dis_insn *disasm_insn)
